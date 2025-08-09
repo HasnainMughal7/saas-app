@@ -1,5 +1,9 @@
+'use client'
+
+import { createBookmark, deleteBookmark, getBookmark } from "@/lib/actions/companion.actions";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface CompanionCardProps {
     id: string;
@@ -11,12 +15,40 @@ interface CompanionCardProps {
 }
 
 const CompanionCard = ({ id, name, topic, subject, duration, color }: CompanionCardProps) => {
+    const [marked, setMarked] = useState(false)
+
+    const handleBookmarkClick = async () => {
+        if(marked){
+            const res = await deleteBookmark(id);
+            if (res) {
+                setMarked(!marked);
+            }
+        } else {
+            const res = await createBookmark(id);
+            if (res) {
+                setMarked(!marked);
+            }
+        }
+    }
+
+    useEffect(() => {
+        const fetchBookmarks = async () => {
+            const res = await getBookmark(id)
+            if (res !== null && res !== undefined) {
+                setMarked(true)
+            } else {
+                setMarked(false)
+            }
+        }
+        fetchBookmarks()
+    }, [marked])
+
     return (
         <article className="companion-card" style={{ backgroundColor: color }}>
             <div className="flex justify-between items-center">
                 <div className="subject-badge">{subject}</div>
-                <button className="companion-bookmark">
-                    <Image src="/icons/bookmark.svg" alt="bookmark" width={12.5} height={15} />
+                <button className="companion-bookmark" onClick={handleBookmarkClick}>
+                    <Image src={marked ? "/icons/bookmark-filled.svg" : "/icons/bookmark.svg"} alt="bookmark" width={12.5} height={15} />
                 </button>
             </div>
 

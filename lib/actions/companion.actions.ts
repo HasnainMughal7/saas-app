@@ -18,6 +18,71 @@ export const createCompanion = async (formData: CreateCompanion) => {
     }
 
     return data[0]
+
+}
+export const createBookmark = async (companion_id: string) => {
+    const { userId } = await auth()
+    const supabase = createSupabaseClient()
+
+    if(userId){
+        const { data, error } = await supabase
+            .from('bookmarks')
+            .insert({ companion_id, author: userId })
+            .select()
+        ;
+        let res = true
+    
+        if (error) {
+            res = false
+            throw new Error(error?.message || "Failed to create companion")
+        }
+    
+        return res
+    } else {
+        return false
+    }
+}
+export const deleteBookmark = async (companion_id: string) => {
+    const { userId } = await auth()
+    const supabase = createSupabaseClient()
+
+    if(userId){
+        const { data, error } = await supabase
+            .from('bookmarks')
+            .delete()
+            .eq('author', userId)
+            .eq('companion_id', companion_id)
+        ;
+        let res = true
+    
+        if (error) {
+            res = false
+            throw new Error(error?.message || "Failed to create companion")
+        }
+    
+        return res
+    } else {
+        return false
+    }
+}
+
+export const getBookmark = async (companion_id: string) => {
+    const { userId } = await auth()
+    const supabase = createSupabaseClient()
+
+    if(userId){
+        const { data, error } = await supabase
+            .from('bookmarks')
+            .select()
+            .eq('author', userId)
+            .eq('companion_id', companion_id)
+        ;
+        if (error) return console.log(error)
+    
+        return data[0]
+    } else {
+        return null
+    }
 }
 
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
@@ -73,20 +138,7 @@ export const addToSessionHistory = async (companionId: string) => {
     return data
 }
 
-export const getSessionHistory = async (limit = 10) => {
-    const supabase = createSupabaseClient()
-    const { data, error } = await supabase
-        .from('session_history')
-        .select(`companions:companion_id (*)`)
-        .order('created_at', { ascending: false })
-        .limit(limit)
-        ;
-    if (error) throw new Error(error.message)
-
-    return data.map(({ companions }) => companions)
-}
-
-export const getUserSessions = async (userId: string, limit = 10) => {
+export const getUserSessions = async (userId: any, limit = 10) => {
     const supabase = createSupabaseClient()
     const { data, error } = await supabase
         .from('session_history')
@@ -97,7 +149,13 @@ export const getUserSessions = async (userId: string, limit = 10) => {
         ;
     if (error) throw new Error(error.message)
 
-    return data.map(({ companions }) => companions)
+    let sessions = data.map(({ companions }) => companions as any);
+
+    const final = sessions.filter((session, index) => {
+        return sessions.findIndex(s => s.id === session.id) === index
+    })
+
+    return final
 }
 
 export const getUserCompanions = async (userId: string) => {

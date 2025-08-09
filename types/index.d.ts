@@ -34,6 +34,10 @@ interface CreateCompanion {
   style: string;
   duration: number;
 }
+interface createBookmark {
+  companion_id: string;
+  author: string | null;
+}
 
 interface GetAllCompanions {
   limit?: number;
