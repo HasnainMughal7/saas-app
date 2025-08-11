@@ -3,6 +3,7 @@
 import { createBookmark, deleteBookmark, getBookmark } from "@/lib/actions/companion.actions";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface CompanionCardProps {
@@ -12,20 +13,26 @@ interface CompanionCardProps {
     subject: string;
     duration: number;
     color: string;
+    isSignedIn: boolean;
 }
 
-const CompanionCard = ({ id, name, topic, subject, duration, color }: CompanionCardProps) => {
+const CompanionCard = ({ id, name, topic, subject, duration, color, isSignedIn }: CompanionCardProps) => {
     const [marked, setMarked] = useState(false)
 
     const handleBookmarkClick = async () => {
+        if (!isSignedIn) {
+            redirect("/sign-in")
+        }
         if(marked){
+            setMarked(!marked);
             const res = await deleteBookmark(id);
-            if (res) {
+            if (!res) {
                 setMarked(!marked);
             }
         } else {
+            setMarked(!marked);
             const res = await createBookmark(id);
-            if (res) {
+            if (!res) {
                 setMarked(!marked);
             }
         }
@@ -41,7 +48,7 @@ const CompanionCard = ({ id, name, topic, subject, duration, color }: CompanionC
             }
         }
         fetchBookmarks()
-    }, [marked])
+    }, [])
 
     return (
         <article className="companion-card" style={{ backgroundColor: color }}>

@@ -24,19 +24,19 @@ export const createBookmark = async (companion_id: string) => {
     const { userId } = await auth()
     const supabase = createSupabaseClient()
 
-    if(userId){
+    if (userId) {
         const { data, error } = await supabase
             .from('bookmarks')
             .insert({ companion_id, author: userId })
             .select()
-        ;
+            ;
         let res = true
-    
+
         if (error) {
             res = false
             throw new Error(error?.message || "Failed to create companion")
         }
-    
+
         return res
     } else {
         return false
@@ -46,20 +46,20 @@ export const deleteBookmark = async (companion_id: string) => {
     const { userId } = await auth()
     const supabase = createSupabaseClient()
 
-    if(userId){
+    if (userId) {
         const { data, error } = await supabase
             .from('bookmarks')
             .delete()
             .eq('author', userId)
             .eq('companion_id', companion_id)
-        ;
+            ;
         let res = true
-    
+
         if (error) {
             res = false
             throw new Error(error?.message || "Failed to create companion")
         }
-    
+
         return res
     } else {
         return false
@@ -70,16 +70,35 @@ export const getBookmark = async (companion_id: string) => {
     const { userId } = await auth()
     const supabase = createSupabaseClient()
 
-    if(userId){
+    if (userId) {
         const { data, error } = await supabase
             .from('bookmarks')
             .select()
             .eq('author', userId)
             .eq('companion_id', companion_id)
-        ;
+            ;
         if (error) return console.log(error)
-    
+
         return data[0]
+    } else {
+        return null
+    }
+}
+
+export const getAllBookmark = async () => {
+    const { userId } = await auth()
+    const supabase = createSupabaseClient()
+
+    if (userId) {
+        const { data, error } = await supabase
+            .from('bookmarks')
+            .select(`companions:companion_id (*)`)
+            .eq('author', userId)
+            .order('created_at', { ascending: false })
+            ;
+        if (error) return console.log(error)
+
+        return data.map(({ companions }) => companions as any)
     } else {
         return null
     }

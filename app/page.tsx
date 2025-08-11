@@ -13,9 +13,17 @@ const Page = async () => {
   const popCompanions = await getAllCompanions({ limit: 5 })
   const recentSessionsCompanions = await getUserSessions(userId)
 
+  
   let myCompanions;
+  let filteredPopCompanions;
   if (userId) {
     myCompanions = await getUserCompanions(userId)
+    const idsInMySessions = new Set(myCompanions.map(session => session.id))
+    filteredPopCompanions = popCompanions.filter(companion => !idsInMySessions.has(companion.id));
+  }
+
+  if (!filteredPopCompanions || filteredPopCompanions.length === 0) {
+    filteredPopCompanions = popCompanions;
   }
 
   return (
@@ -23,8 +31,8 @@ const Page = async () => {
       <h1 className='text-2xl underline'>Popular Companions</h1>
 
       <section className='home-section'>
-        {popCompanions?.map((companion) => (
-          <CompanionCard key={companion.id} {...companion} color={getSubjectColor(companion.subject)} />
+        {filteredPopCompanions?.map((companion) => (
+          <CompanionCard key={companion.id} {...companion} color={getSubjectColor(companion.subject)} isSignedIn={userId ? true : false} />
         ))}
       </section>
 
@@ -34,7 +42,7 @@ const Page = async () => {
 
           <section className='home-section'>
             {myCompanions?.map((companion) => (
-              <CompanionCard key={companion.id} {...companion} color={getSubjectColor(companion.subject)} />
+              <CompanionCard key={companion.id} {...companion} color={getSubjectColor(companion.subject)} isSignedIn={userId ? true : false} />
             ))}
           </section>
         </>

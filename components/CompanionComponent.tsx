@@ -103,7 +103,7 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName, userI
       <section className="flex gap-8 max-sm:flex-col">
         <div className="companion-section">
           <div className="companion-avatar" style={{ backgroundColor: getSubjectColor(subject) }}>
-            <div className={cn('absolute transition-opacity duration-1000',
+            <div className={cn('transition-opacity duration-1000',
               callStatus === CallStatus.FINISHED || callStatus === CallStatus.INACTIVE ? 'opacity-1001' : 'opacity-0',
               callStatus === CallStatus.CONNECTING && 'opacity-100 animate-pulse'
             )}>
