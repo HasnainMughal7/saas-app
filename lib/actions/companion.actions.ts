@@ -104,6 +104,23 @@ export const getAllBookmark = async () => {
     }
 }
 
+export const getAllNames = async () => {
+    const { userId } = await auth()
+    const supabase = createSupabaseClient()
+
+    if (userId) {
+        const { data, error } = await supabase
+            .from('companions')
+            .select(`id, name, subject, topic`)
+            .order('created_at', { ascending: false })
+            ;
+        if (error) return console.log(error)
+        return data.map(({ name, id, subject, topic }: { name: string, id: string, subject: string, topic: string }) => ({ name, id, subject, topic }))
+    } else {
+        return null
+    }
+}
+
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
     const supabase = createSupabaseClient()
 
@@ -138,7 +155,10 @@ export const getCompanion = async (id: string) => {
         .select()
         .eq('id', id)
         ;
-    if (error) return console.log(error)
+    if (error) {
+        console.log(error)
+        return false
+    }
 
     return data[0]
 }

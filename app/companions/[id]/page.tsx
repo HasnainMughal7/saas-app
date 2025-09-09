@@ -11,7 +11,6 @@ const CompanionSession = async ({ params }: { params: Promise<{ id: string }> })
   const user = await currentUser()
 
   const { name, subject, topic, title, duration, voice } = companion
-
   if (!user) redirect("/sign-in")
   if (!name) redirect("/companions")
 

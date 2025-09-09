@@ -23,8 +23,9 @@ import {
 } from "@/components/ui/select"
 import { subjects } from "@/constants"
 import { Textarea } from "./ui/textarea"
-import { createCompanion } from "@/lib/actions/companion.actions"
+import { createCompanion, getAllNames } from "@/lib/actions/companion.actions"
 import { redirect } from "next/navigation"
+import { useState } from "react"
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Companion name is required" }),
@@ -38,6 +39,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 const CompanionForm = () => {
+
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema) as any,
         defaultValues: {
@@ -51,13 +53,30 @@ const CompanionForm = () => {
     })
 
     const onSubmit = async (values: FormData) => {
-        const companion = await createCompanion(values)
+        const existingCompanions = await getAllNames()
+        if (existingCompanions) {
 
-        if(companion){
-            redirect(`/companions/${companion.id}`)
-        } else {
-            console.log("Companion creation failed!")
-            redirect('/')
+            existingCompanions.forEach((comp) => {
+                if (
+                    comp.name.toLowerCase() === values.name.toLowerCase() &&
+                    comp.subject.toLowerCase() === values.subject.toLowerCase() &&
+                    comp.topic.toLowerCase() === values.topic.toLowerCase()
+                ) {
+                    alert('This companion already exists!, Redirecting to it!...')
+                    redirect(`/companions/${comp.id}`)
+                }
+            });
+
+
+            const companion = await createCompanion(values)
+
+            if (companion) {
+                redirect(`/companions/${companion.id}`)
+            } else {
+                console.log("Companion creation failed!")
+                redirect('/')
+            }
+
         }
     }
 
